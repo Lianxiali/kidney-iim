@@ -24,6 +24,7 @@ BcData::BcData(const libMesh::Mesh& mesh, SAMRAI::tbox::Pointer<SAMRAI::tbox::Da
     uz_distal_artery(input_db->getDouble("uz_distal_artery"))
 {
     // Set boundary nodes based on the mesh
+    pout << "uz_proximal_artery = " << uz_proximal_artery << std::endl;
     if(d_vein_node_coordinates.size()==0)
         get_boundary_nodes(d_mesh, d_vein_node_coordinates, d_proximal_artery_node_coordinates, d_distal_artery_node_coordinates);
 }

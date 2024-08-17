@@ -97,6 +97,7 @@ VelocityBcCoefs::setBcCoefs(Pointer<ArrayData<NDIM, double>>& acoef_data,
                 X[d] = x_lower[d] + dx[d] * (double(i(d) - patch_lower(d)) + (d == axis ? 0.0 : 0.5));
                 pt[d] = X[d];
             }
+            // pout << "pt = " << pt[0] << " " << pt[1] << " " << pt[2];                
 
             if (d_bc_data.is_vein(pt)) // pressure boundary condition
             {
@@ -148,7 +149,6 @@ VelocityBcCoefs::setBcCoefs(Pointer<ArrayData<NDIM, double>>& acoef_data,
             }
             else if (d_bc_data.is_distal_artery(pt))
             {
-                // pout << "pt = " << pt[0] << " " << pt[1] << " " << pt[2];                
                 // pout << " is inside the distal artery boundary. " << std::endl;
                 if (d_comp_idx == 0) // vx
                 {
@@ -173,7 +173,9 @@ VelocityBcCoefs::setBcCoefs(Pointer<ArrayData<NDIM, double>>& acoef_data,
             {
                 a = 1.0;
                 b = 0.0;
-                g = 0.0;                    
+                g = 0.0;
+                // pout << " is outside the 3 regions but on the z plane. " << std::endl;
+
             }
         }// end else z plane
         
