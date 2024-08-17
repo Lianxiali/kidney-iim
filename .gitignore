@@ -3,4 +3,5 @@ build/
 main3d
 *.curve
 *.log
+*.txt
 

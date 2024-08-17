@@ -25,7 +25,7 @@ public:
     /*!
      * \brief Constructor
      */
-    VelocityBcCoefs(const INSHierarchyIntegrator* fluid_solver, const BcData& bc_data, int comp_idx, const libMesh::Mesh& mesh);
+    VelocityBcCoefs(const INSHierarchyIntegrator* fluid_solver, const BcData& bc_data, int comp_idx);
 
     /*!
      * \brief Destructor.
@@ -59,9 +59,7 @@ public:
 
     double parabolic_flow(double t, double y, double r) const;
     double time_ramp(double t) const;
-    bool is_vein(const std::array<double, 3>& pt) const;
-    bool is_distal_artery(const std::array<double, 3>& pt) const;
-    bool is_proximal_artery(const std::array<double, 3>& pt) const;
+
 
 private:
     /*!
@@ -87,11 +85,7 @@ private:
     //    const CirculationModel* const d_circ_model;
     const INSHierarchyIntegrator* const d_fluid_solver;
     const int d_comp_idx;
-    const BcData d_bc_data;
-    const libMesh::Mesh& d_mesh;
-    std::vector<std::array<double, 3>> d_vein_node_coordinates;
-    std::vector<std::array<double, 3>> d_proximal_artery_node_coordinates;
-    std::vector<std::array<double, 3>> d_distal_artery_node_coordinates;      
+    const BcData d_bc_data;  
 };
 
 #endif // INCLUDED_VELOCITY_BC_COEFS

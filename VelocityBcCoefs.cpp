@@ -16,7 +16,6 @@
 #include "VelocityBcCoefs.h"
 
 #include <CartesianPatchGeometry.h>
-#include "utility.h"  
 
 bool is_point_inside_polygon(const std::vector<std::array<double, 3>>& points, const std::array<double, 3>& pt);
 
@@ -28,21 +27,18 @@ using namespace libMesh;
 
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 
-VelocityBcCoefs::VelocityBcCoefs(
+VelocityBcCoefs::VelocityBcCoefs
+(
     const INSHierarchyIntegrator* fluid_solver, 
     const BcData& bc_data, 
-    int comp_idx,
-    const libMesh::Mesh& mesh)
+    int comp_idx
+)
 : 
 d_fluid_solver(fluid_solver), 
 d_comp_idx(comp_idx), 
-d_bc_data(bc_data),
-d_mesh(mesh)
+d_bc_data(bc_data)
 {
-    // Set boundary nodes based on the mesh
-    pout << "d_vein_node_coordinates.size() = " << d_vein_node_coordinates.size() <<std::endl;
-    if(d_vein_node_coordinates.size() ==0)
-        get_boundary_nodes(d_mesh, d_vein_node_coordinates, d_proximal_artery_node_coordinates, d_distal_artery_node_coordinates);
+
 } // VelocityBcCoefs
 
 VelocityBcCoefs::~VelocityBcCoefs() = default; // Use default destructor
@@ -103,18 +99,17 @@ pout << " I'm doing setBCCoefs " << std::endl;
                     pt[d] = X[d];
                 }
                 pout << "pt = " << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
-                if (is_vein(pt))
+                if (d_bc_data.is_vein(pt))
                 {
                     pout << "X is inside the vein boundary. " << std::endl;
                 }
-                else if (is_proximal_artery(pt))
+                else if (d_bc_data.is_proximal_artery(pt))
                 {
                     pout << "X is inside the proxmial artery boundary. " << std::endl;
                 }
-                else if (is_distal_artery(pt))
+                else if (d_bc_data.is_distal_artery(pt))
                 {
                     pout << "X is inside the distal artery boundary. " << std::endl;
-
                 }
                 else
                 {
@@ -162,22 +157,7 @@ VelocityBcCoefs::time_ramp(double t) const
     return (t < d_bc_data.t_load) ? 0.0 : 1.0;
 }
 
-bool 
-VelocityBcCoefs::is_vein(const std::array<double, 3>& pt) const
-{
-    return is_point_inside_polygon(d_vein_node_coordinates, pt);
-}
 
-bool 
-VelocityBcCoefs::is_distal_artery(const std::array<double, 3>& pt) const
-{
-    return is_point_inside_polygon(d_distal_artery_node_coordinates, pt);
-}
-bool 
-VelocityBcCoefs::is_proximal_artery(const std::array<double, 3>& pt) const
-{
-    return is_point_inside_polygon(d_proximal_artery_node_coordinates, pt);
-}
 /////////////////////////////// PROTECTED ////////////////////////////////////
 
 /////////////////////////////// PRIVATE //////////////////////////////////////

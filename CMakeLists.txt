@@ -22,7 +22,7 @@ SET(IBAMR_ROOT /home/michael/software/IIM/IBAMR/build)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 
 # List your source files here - this example has just one.
-SET(SOURCE_FILES example.cpp FeedbackForcer.cpp VelocityBcCoefs.cpp)
+SET(SOURCE_FILES example.cpp FeedbackForcer.cpp VelocityBcCoefs.cpp BcData.cpp)
 ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCE_FILES})
 
 FIND_PACKAGE(IBAMR 0.15.0 REQUIRED)

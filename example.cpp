@@ -323,11 +323,12 @@ pout << "NCELLS_Z = " << input_db->getDouble("NCELLS_Z") << std::endl;
         #pragma region create custom BCs 
         // register bc's
         vector<RobinBcCoefStrategy<NDIM>*> u_bc_coefs(NDIM);
-        BcData bc_data(input_db->getDatabase("BcCoefs"));
+        BcData bc_data(mesh, input_db->getDatabase("BcCoefs"));
         for (int d = 0; d < NDIM; ++d)
-            u_bc_coefs[d] = new VelocityBcCoefs(navier_stokes_integrator, bc_data, d, mesh); // VelocityBcCoefs extends
+            u_bc_coefs[d] = new VelocityBcCoefs(navier_stokes_integrator, bc_data, d); // VelocityBcCoefs extends
                                                                                        // RobinBcCoefStrategy
-        navier_stokes_integrator->registerPhysicalBoundaryConditions(u_bc_coefs);        
+        navier_stokes_integrator->registerPhysicalBoundaryConditions(u_bc_coefs); 
+            
         #pragma endregion
 
         // Create Eulerian body force function specification objects.
