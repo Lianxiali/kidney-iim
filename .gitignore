@@ -1,0 +1,6 @@
+viz_iim_3D/
+build/
+main3d
+*.curve
+*.log
+
