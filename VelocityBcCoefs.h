@@ -57,10 +57,6 @@ public:
 
     //\}
 
-    double parabolic_flow(double t, double y, double r) const;
-    double time_ramp(double t) const;
-
-
 private:
     /*!
      * \brief Copy constructor.

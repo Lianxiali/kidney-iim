@@ -54,7 +54,6 @@ VelocityBcCoefs::setBcCoefs(Pointer<ArrayData<NDIM, double>>& acoef_data,
 {
     const int location_index = bdry_box.getLocationIndex();
     const int axis = location_index / 2;
-pout << " I'm doing setBCCoefs " << std::endl;
 #if !defined(NDEBUG)
     TBOX_ASSERT(!acoef_data.isNull());
 #endif
@@ -81,57 +80,137 @@ pout << " I'm doing setBCCoefs " << std::endl;
         double& b = (!bcoef_data.isNull() ? (*bcoef_data)(i, 0) : dummy);
         double& g = (!gcoef_data.isNull() ? (*gcoef_data)(i, 0) : dummy);
 
+        // set velocity to zero on x and y faces... for components d_comp_idx
+        if (axis == 0 || axis == 1)
         {
-            if (d_comp_idx != axis)
+            a = 1.0;
+            b = 0.0;
+            g = 0.0;
+        }
+        else // on zmin or zmax planes
+        {
+            double X[NDIM];
+            std::array<double, 3> pt = {0.0, 0.0, 0.0};
+
+            for (int d = 0; d < NDIM; ++d)
             {
-                a = 1.0;
-                b = 0.0;
-                g = 0.0;
+                X[d] = x_lower[d] + dx[d] * (double(i(d) - patch_lower(d)) + (d == axis ? 0.0 : 0.5));
+                pt[d] = X[d];
             }
 
+            if (d_bc_data.is_vein(pt)) // pressure boundary condition
             {
-                double X[NDIM];
-                std::array<double, 3> pt = {0.0, 0.0, 0.0};
-
-                for (int d = 0; d < NDIM; ++d)
-                {
-                    X[d] = x_lower[d] + dx[d] * (double(i(d) - patch_lower(d)) + (d == axis ? 0.0 : 0.5));
-                    pt[d] = X[d];
-                }
-                pout << "pt = " << pt[0] << " " << pt[1] << " " << pt[2] << std::endl;
-                if (d_bc_data.is_vein(pt))
-                {
-                    pout << "X is inside the vein boundary. " << std::endl;
-                }
-                else if (d_bc_data.is_proximal_artery(pt))
-                {
-                    pout << "X is inside the proxmial artery boundary. " << std::endl;
-                }
-                else if (d_bc_data.is_distal_artery(pt))
-                {
-                    pout << "X is inside the distal artery boundary. " << std::endl;
-                }
-                else
+                // pout << "pt = " << pt[0] << " " << pt[1] << " " << pt[2];
+                // pout << " is inside the vein boundary. " << std::endl;
+                if (d_comp_idx == 0) // vx
                 {
                     a = 1.0;
                     b = 0.0;
-                    g = 0.0;                    
+                    g = 0.0;
                 }
+                else if (d_comp_idx == 1) // vy
+                {
+                    a = 1.0;
+                    b = 0.0;
+                    g = 0.0;
+                }
+                else // since u=v=0, then du/dx=dv/dy=0 ==> dw/dz=0 ==> viscous force = 0
+                {
+                    // au+b[pI+(\nabla u + \nabla u^T) \cdot n] = g
+                    // pressure boundary condition p = 0
+                    a = 0.0;
+                    b = 1.0;
+                    g = -d_bc_data.p_vein;
+                }                
             }
-        }
-
-        // z_hi face (distal artery)
-        if (location_index == 5)
-        {
-            if (d_comp_idx != axis)
+            else if (d_bc_data.is_proximal_artery(pt))
+            {
+                // pout << "pt = " << pt[0] << " " << pt[1] << " " << pt[2];
+                // pout << " is inside the proxmial artery boundary. " << std::endl;
+                if (d_comp_idx == 0) // vx
+                {
+                    a = 1.0;
+                    b = 0.0;
+                    g = d_bc_data.ux_proximal_artery;
+                }
+                else if (d_comp_idx == 1) // vy
+                {
+                    a = 1.0;
+                    b = 0.0;
+                    g = d_bc_data.uy_proximal_artery;                    
+                }
+                else //vz
+                {
+                    a = 1.0;
+                    b = 0.0;
+                    g = d_bc_data.uz_proximal_artery;
+                }                     
+            }
+            else if (d_bc_data.is_distal_artery(pt))
+            {
+                // pout << "pt = " << pt[0] << " " << pt[1] << " " << pt[2];                
+                // pout << " is inside the distal artery boundary. " << std::endl;
+                if (d_comp_idx == 0) // vx
+                {
+                    a = 1.0;
+                    b = 0.0;
+                    g = d_bc_data.ux_distal_artery;
+                }
+                else if (d_comp_idx == 1) // vy
+                {
+                    a = 1.0;
+                    b = 0.0;
+                    g = d_bc_data.uy_distal_artery;
+                }
+                else //vz
+                {
+                    a = 1.0;
+                    b = 0.0;
+                    g = d_bc_data.uz_distal_artery;
+                }                     
+            }
+            else // on z plane but not inside the 3 boundary regions
             {
                 a = 1.0;
                 b = 0.0;
-                g = 0.0;
+                g = 0.0;                    
             }
+        }// end else z plane
+        
+        // z_lo face
+        // if (location_index == 4)
+        // {
+        //     if (d_comp_idx == 0) // vx
+        //     {
+        //         a = 1.0;
+        //         b = 0.0;
+        //         g = 0.0;
+        //     }
+        //     else if (d_comp_idx == 1) // vy
+        //     {
+        //         a = 1.0;
+        //         b = 0.0;
+        //         g = 0.0;
+        //     }
+        //     else //vz
+        //     {
+        //         a = 1.0;
+        //         b = 0.0;
+        //         g = 0.0;
+        //     }
+        // }
 
-        }
-    }
+        // // z_hi face (distal artery)
+        // if (location_index == 5)
+        // {
+        //     {
+        //         a = 1.0;
+        //         b = 0.0;
+        //         g = 0.0;
+        //     }
+
+        // }
+    } // end for loop
     return;
 } // setBcCoefs
 
@@ -143,19 +222,6 @@ VelocityBcCoefs::numberOfExtensionsFillable() const
     return 128;
 } // numberOfExtensionsFillable
 
-double
-VelocityBcCoefs::parabolic_flow(double t, double y, double r) const
-{
-    double c = (y > 0.0) ? d_bc_data.U1 : d_bc_data.U2;
-    double U = c * (1.0 - r * r);
-    return time_ramp(t) * U;
-}
-
-double
-VelocityBcCoefs::time_ramp(double t) const
-{
-    return (t < d_bc_data.t_load) ? 0.0 : 1.0;
-}
 
 
 /////////////////////////////// PROTECTED ////////////////////////////////////

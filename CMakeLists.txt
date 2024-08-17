@@ -33,6 +33,6 @@ SET(CMAKE_CXX_FLAGS ${IBAMR_CXX_FLAGS})
 
 # SET(IBAMR_DIR $HOME/software/IBAMR/debug)
 
-#SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_BUILD_TYPE "Debug")
 # SET(CMAKE_LIBRARY_PATH /home/michael/software/IBAMR/lib)
 

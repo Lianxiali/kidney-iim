@@ -287,7 +287,7 @@ Main {
 
 // visualization dump parameters
    viz_writer                  = "VisIt","ExodusII"
-   viz_dump_interval           = int(1.0/DT)
+   viz_dump_interval           = 1 //int(1.0/DT)
    viz_dump_dirname            = "viz_IIM_3D"
    visit_number_procs_per_file = 1
 
@@ -349,18 +349,11 @@ TimerManager{
 }
 
 BcCoefs {
-
-   U1 = 63.0
-   U2 = 61.5
-   T_LOAD = 0.0
-   TG_LOAD = 0.5
-   WALL = 0.0
-   D_IN = 2.03
-   D_OUT = 7.6
-   H1_IN = 2.785
-   H2_IN = -2.785
-   H_OUT = 0.0
-   Z_MIN = -3.025 //-2.95
-   Z_MAX = 9.17 // 8.95
-   
-   }
+   p_vein = 0
+   ux_proximal_artery = 0
+   uy_proximal_artery = 0
+   uz_proximal_artery = 1.0
+   ux_distal_artery = 0
+   uy_distal_artery = 0
+   uz_distal_artery = 0.1   
+}

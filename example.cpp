@@ -52,64 +52,64 @@
 namespace ModelData
 {
 
-// Elasticity model data for thin body.
-// Tether (penalty) force function for thin body.
-static double kappa_s_thin = 1.0;
-static double eta_s_thin = 1.0;
+    // Elasticity model data for thin body.
+    // Tether (penalty) force function for thin body.
+    static double kappa_s_thin = 1.0;
+    static double eta_s_thin = 1.0;
 
-static double L = 0.0;
-static double D = 0.0;
-static double H = 0.0;
-static double p_e = 0.0;
-static double MU = 0.0;
-static double theta = 0.0;
-static double zi = 0.0;
-static double yi = 0.0;
-static double yo = 0.0;
-static double U_MAX = 0.0;
-static double zo = 0.0;
-void
-tether_body_force_function_thin(VectorValue<double>& F,
-                                const VectorValue<double>& n,
-                                const VectorValue<double>& /*N*/,
-                                const TensorValue<double>& /*FF*/,
-                                const libMesh::Point& x,
-                                const libMesh::Point& X,
-                                Elem* const /*elem*/,
-                                const unsigned short /*side*/,
-                                const vector<const vector<double>*>& var_data,
-                                const vector<const vector<VectorValue<double> >*>& /*grad_var_data*/,
-                                double /*time*/,
-                                void* /*ctx*/)
-{
-    const std::vector<double>& U = *var_data[0];
-
-    double u_bndry_n = 0.0;
-    double x_kappa_n = 0.0;
-    for (unsigned int d = 0; d < NDIM; ++d)
+    static double L = 0.0;
+    static double D = 0.0;
+    static double H = 0.0;
+    static double p_e = 0.0;
+    static double MU = 0.0;
+    static double theta = 0.0;
+    static double zi = 0.0;
+    static double yi = 0.0;
+    static double yo = 0.0;
+    static double U_MAX = 0.0;
+    static double zo = 0.0;
+    void
+        tether_body_force_function_thin(VectorValue<double>& F,
+            const VectorValue<double>& n,
+            const VectorValue<double>& /*N*/,
+            const TensorValue<double>& /*FF*/,
+            const libMesh::Point& x,
+            const libMesh::Point& X,
+            Elem* const /*elem*/,
+            const unsigned short /*side*/,
+            const vector<const vector<double>*>& var_data,
+            const vector<const vector<VectorValue<double> >*>& /*grad_var_data*/,
+            double /*time*/,
+            void* /*ctx*/)
     {
-        x_kappa_n += n(d) * kappa_s_thin * (X(d) - x(d));
-        u_bndry_n += n(d) * U[d];
+        const std::vector<double>& U = *var_data[0];
+
+        double u_bndry_n = 0.0;
+        double x_kappa_n = 0.0;
+        for (unsigned int d = 0; d < NDIM; ++d)
+        {
+            x_kappa_n += n(d) * kappa_s_thin * (X(d) - x(d));
+            u_bndry_n += n(d) * U[d];
+        }
+
+        // The tether force is proportional to the mismatch between the positions
+        // and velocities.
+        for (unsigned int d = 0; d < NDIM; ++d)
+        {
+            F(d) = kappa_s_thin * (X(d) - x(d)) - eta_s_thin * U[d]; //(0.0 - u_bndry_n * n(d));
+        }
+        return;
     }
 
-    // The tether force is proportional to the mismatch between the positions
-    // and velocities.
-    for (unsigned int d = 0; d < NDIM; ++d)
+    inline unsigned int
+        idx(const unsigned int nr, const unsigned int i, const unsigned int j)
     {
-        F(d) = kappa_s_thin * (X(d) - x(d)) - eta_s_thin * U[d]; //(0.0 - u_bndry_n * n(d));
+        return i + j * nr;
+
+        return libMesh::invalid_uint;
     }
-    return;
-}
 
-inline unsigned int
-idx(const unsigned int nr, const unsigned int i, const unsigned int j)
-{
-    return i + j * nr;
-
-    return libMesh::invalid_uint;
-}
-
-static double x_loc_min, x_loc_max, z_loc_min, z_loc_max, y_loc_min, y_loc_max;
+    static double x_loc_min, x_loc_max, z_loc_min, z_loc_max, y_loc_min, y_loc_max;
 } // namespace ModelData
 
 using namespace ModelData;
@@ -117,33 +117,33 @@ using namespace ModelData;
 static ofstream flow_rate_stream;
 // Function prototypes
 void compute_velocity_profile(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
-                              const int u_idx,
-                              const double /*data_time*/,
-                              const string& /*data_dump_dirname*/);
+    const int u_idx,
+    const double /*data_time*/,
+    const string& /*data_dump_dirname*/);
 
 void compute_pressure_profile(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
-                              const int p_idx,
-                              const double /*data_time*/,
-                              const string& /*data_dump_dirname*/);
+    const int p_idx,
+    const double /*data_time*/,
+    const string& /*data_dump_dirname*/);
 
 void postprocess_data(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
-                      tbox::Pointer<INSHierarchyIntegrator> navier_stokes_integrator,
-                      Mesh& mesh,
-                      EquationSystems* equation_systems,
-                      const int iteration_num,
-                      const double loop_time,
-                      const string& data_dump_dirname);
+    tbox::Pointer<INSHierarchyIntegrator> navier_stokes_integrator,
+    Mesh& mesh,
+    EquationSystems* equation_systems,
+    const int iteration_num,
+    const double loop_time,
+    const string& data_dump_dirname);
 
 void output_data(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
-                 tbox::Pointer<IBHierarchyIntegrator> ins_integrator,
-                 const int iteration_num,
-                 const double loop_time,
-                 const string& data_dump_dirname);
+    tbox::Pointer<IBHierarchyIntegrator> ins_integrator,
+    const int iteration_num,
+    const double loop_time,
+    const string& data_dump_dirname);
 
 void compute_flow_rate(const tbox::Pointer<PatchHierarchy<NDIM> > hierarchy,
-                       const int U_idx,
-                       const double loop_time,
-                       const int wgt_sc_idx);
+    const int U_idx,
+    const double loop_time,
+    const int wgt_sc_idx);
 /*******************************************************************************
  * For each run, the input filename and restart information (if needed) must   *
  * be given on the command line.  For non-restarted case, command line is:     *
@@ -199,9 +199,9 @@ main(int argc, char* argv[])
         L = input_db->getDouble("L");              // channel length (cm)
         H = input_db->getDouble("H");              // channel length (cm)
         const double H = input_db->getDouble("H"); // wall thickness (cm)
-pout << "NCELLS_X = " << input_db->getDouble("NCELLS_X") << std::endl;
-pout << "NCELLS_Y = " << input_db->getDouble("NCELLS_Y") << std::endl;
-pout << "NCELLS_Z = " << input_db->getDouble("NCELLS_Z") << std::endl;
+        pout << "NCELLS_X = " << input_db->getDouble("NCELLS_X") << std::endl;
+        pout << "NCELLS_Y = " << input_db->getDouble("NCELLS_Y") << std::endl;
+        pout << "NCELLS_Z = " << input_db->getDouble("NCELLS_Z") << std::endl;
 
         zo = input_db->getDouble("Zo");
         yo = input_db->getDouble("Yo");
@@ -215,7 +215,7 @@ pout << "NCELLS_Z = " << input_db->getDouble("NCELLS_Z") << std::endl;
         p_e = input_db->getDouble("P_E");
 
 
-        Mesh mesh(init.comm(), NDIM-1);
+        Mesh mesh(init.comm(), NDIM - 1);
 
         // libMesh::GmshIO gmsh_io(mesh);
         // gmsh_io.read(input_db->getString("MESH_FILENAME")); //"cylinder.msh");
@@ -242,31 +242,31 @@ pout << "NCELLS_Z = " << input_db->getDouble("NCELLS_Z") << std::endl;
             app_initializer->getComponentDatabase("INSStaggeredHierarchyIntegrator"));
         tbox::Pointer<IIMethod> ib_method_ops =
             new IIMethod("IIMethod",
-                         app_initializer->getComponentDatabase("IIMethod"),
-                         meshes,
-                         app_initializer->getComponentDatabase("GriddingAlgorithm")->getInteger("max_levels"));
+                app_initializer->getComponentDatabase("IIMethod"),
+                meshes,
+                app_initializer->getComponentDatabase("GriddingAlgorithm")->getInteger("max_levels"));
         tbox::Pointer<IBHierarchyIntegrator> time_integrator =
             new IBExplicitHierarchyIntegrator("IBHierarchyIntegrator",
-                                              app_initializer->getComponentDatabase("IBHierarchyIntegrator"),
-                                              ib_method_ops,
-                                              navier_stokes_integrator);
+                app_initializer->getComponentDatabase("IBHierarchyIntegrator"),
+                ib_method_ops,
+                navier_stokes_integrator);
         tbox::Pointer<CartesianGridGeometry<NDIM> > grid_geometry = new CartesianGridGeometry<NDIM>(
             "CartesianGeometry", app_initializer->getComponentDatabase("CartesianGeometry"));
         tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy =
             new PatchHierarchy<NDIM>("PatchHierarchy", grid_geometry);
         tbox::Pointer<StandardTagAndInitialize<NDIM> > error_detector =
             new StandardTagAndInitialize<NDIM>("StandardTagAndInitialize",
-                                               time_integrator,
-                                               app_initializer->getComponentDatabase("StandardTagAndInitialize"));
+                time_integrator,
+                app_initializer->getComponentDatabase("StandardTagAndInitialize"));
         tbox::Pointer<BergerRigoutsos<NDIM> > box_generator = new BergerRigoutsos<NDIM>();
         tbox::Pointer<LoadBalancer<NDIM> > load_balancer =
             new LoadBalancer<NDIM>("LoadBalancer", app_initializer->getComponentDatabase("LoadBalancer"));
         tbox::Pointer<GriddingAlgorithm<NDIM> > gridding_algorithm =
             new GriddingAlgorithm<NDIM>("GriddingAlgorithm",
-                                        app_initializer->getComponentDatabase("GriddingAlgorithm"),
-                                        error_detector,
-                                        box_generator,
-                                        load_balancer);
+                app_initializer->getComponentDatabase("GriddingAlgorithm"),
+                error_detector,
+                box_generator,
+                load_balancer);
         // Configure the IBFE solver.
         ib_method_ops->initializeFEEquationSystems();
         std::vector<int> vars(NDIM);
@@ -290,46 +290,46 @@ pout << "NCELLS_Z = " << input_db->getDouble("NCELLS_Z") << std::endl;
         navier_stokes_integrator->registerPressureInitialConditions(p_init);
 
         // Create Eulerian boundary condition specification objects.
-        #pragma region read BCs from input file
-        // vector<RobinBcCoefStrategy<NDIM>*> u_bc_coefs(NDIM, static_cast<RobinBcCoefStrategy<NDIM>*>(NULL));
-        // const bool periodic_domain = grid_geometry->getPeriodicShift().min() > 0;
-        // if (!periodic_domain)
-        // {
-        //     for (unsigned int d = 0; d < NDIM; ++d)
-        //     {
-        //         ostringstream bc_coefs_name_stream;
-        //         bc_coefs_name_stream << "u_bc_coefs_" << d;
-        //         const string bc_coefs_name = bc_coefs_name_stream.str();
-        //         ostringstream bc_coefs_db_name_stream;
-        //         bc_coefs_db_name_stream << "VelocityBcCoefs_" << d;
-        //         const string bc_coefs_db_name = bc_coefs_db_name_stream.str();
-        //         u_bc_coefs[d] = new muParserRobinBcCoefs(
-        //             bc_coefs_name, app_initializer->getComponentDatabase(bc_coefs_db_name), grid_geometry);
-        //     }
+#pragma region read BCs from input file
+// vector<RobinBcCoefStrategy<NDIM>*> u_bc_coefs(NDIM, static_cast<RobinBcCoefStrategy<NDIM>*>(NULL));
+// const bool periodic_domain = grid_geometry->getPeriodicShift().min() > 0;
+// if (!periodic_domain)
+// {
+//     for (unsigned int d = 0; d < NDIM; ++d)
+//     {
+//         ostringstream bc_coefs_name_stream;
+//         bc_coefs_name_stream << "u_bc_coefs_" << d;
+//         const string bc_coefs_name = bc_coefs_name_stream.str();
+//         ostringstream bc_coefs_db_name_stream;
+//         bc_coefs_db_name_stream << "VelocityBcCoefs_" << d;
+//         const string bc_coefs_db_name = bc_coefs_db_name_stream.str();
+//         u_bc_coefs[d] = new muParserRobinBcCoefs(
+//             bc_coefs_name, app_initializer->getComponentDatabase(bc_coefs_db_name), grid_geometry);
+//     }
 
-        //     navier_stokes_integrator->registerPhysicalBoundaryConditions(u_bc_coefs);
+//     navier_stokes_integrator->registerPhysicalBoundaryConditions(u_bc_coefs);
 
-        //     if (input_db->keyExists("BoundaryStabilization"))
-        //     {
-        //         time_integrator->registerBodyForceFunction(new StaggeredStokesOpenBoundaryStabilizer(
-        //             "BoundaryStabilization",
-        //             app_initializer->getComponentDatabase("BoundaryStabilization"),
-        //             navier_stokes_integrator,
-        //             grid_geometry));
-        //     }
-        // }
-        #pragma endregion
+//     if (input_db->keyExists("BoundaryStabilization"))
+//     {
+//         time_integrator->registerBodyForceFunction(new StaggeredStokesOpenBoundaryStabilizer(
+//             "BoundaryStabilization",
+//             app_initializer->getComponentDatabase("BoundaryStabilization"),
+//             navier_stokes_integrator,
+//             grid_geometry));
+//     }
+// }
+#pragma endregion
 
-        #pragma region create custom BCs 
-        // register bc's
+#pragma region create custom BCs 
+// register bc's
         vector<RobinBcCoefStrategy<NDIM>*> u_bc_coefs(NDIM);
         BcData bc_data(mesh, input_db->getDatabase("BcCoefs"));
         for (int d = 0; d < NDIM; ++d)
             u_bc_coefs[d] = new VelocityBcCoefs(navier_stokes_integrator, bc_data, d); // VelocityBcCoefs extends
-                                                                                       // RobinBcCoefStrategy
-        navier_stokes_integrator->registerPhysicalBoundaryConditions(u_bc_coefs); 
-            
-        #pragma endregion
+        // RobinBcCoefStrategy
+        navier_stokes_integrator->registerPhysicalBoundaryConditions(u_bc_coefs);
+
+#pragma endregion
 
         // Create Eulerian body force function specification objects.
 
@@ -381,7 +381,7 @@ pout << "NCELLS_Z = " << input_db->getDouble("NCELLS_Z") << std::endl;
         if (SAMRAI_MPI::getRank() == 0)
         {
             flow_rate_stream.open("flow_rate_outflow_kappa_" + std::to_string(int(kappa_s_thin)) + ".curve",
-                                  ios_base::out | ios_base::trunc);
+                ios_base::out | ios_base::trunc);
             flow_rate_stream.precision(10);
         }
         // Main time step loop.
@@ -399,7 +399,7 @@ pout << "NCELLS_Z = " << input_db->getDouble("NCELLS_Z") << std::endl;
             pout << "Simulation time is " << loop_time << "\n";
 
             dt = time_integrator->getMaximumTimeStepSize();
-            // time_integrator->advanceHierarchy(dt);
+            time_integrator->advanceHierarchy(dt);
             loop_time += dt;
 
             pout << "\n";
@@ -420,7 +420,7 @@ pout << "NCELLS_Z = " << input_db->getDouble("NCELLS_Z") << std::endl;
                 pout << "\nWriting visualization files...\n\n";
                 if (uses_visit)
                 {
-pout << "Run to here 16" << std::endl;
+                    pout << "Run to here 16" << std::endl;
                     time_integrator->setupPlotData();
                     visit_data_writer->writePlotData(patch_hierarchy, iteration_num, loop_time);
                     exodus_io_thin->write_timestep(
@@ -455,18 +455,18 @@ pout << "Run to here 16" << std::endl;
             pout << "\nWriting state data...\n\n";
 
             postprocess_data(patch_hierarchy,
-                             navier_stokes_integrator,
-                             mesh,
-                             equation_systems_thin,
-                             iteration_num,
-                             loop_time,
-                             postproc_data_dump_dirname);
+                navier_stokes_integrator,
+                mesh,
+                equation_systems_thin,
+                iteration_num,
+                loop_time,
+                postproc_data_dump_dirname);
         }
 
         // Determine the accuracy of the computed solution.
         pout << "\n"
-             << "+++++++++++++++++++++++++++++++++++++++++++++++++++\n"
-             << "Computing error norms.\n\n";
+            << "+++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+            << "Computing error norms.\n\n";
         VariableDatabase<NDIM>* var_db = VariableDatabase<NDIM>::getDatabase();
         tbox::Pointer<hier::Variable<NDIM> > u_var = navier_stokes_integrator->getVelocityVariable();
         const tbox::Pointer<VariableContext> u_ctx = navier_stokes_integrator->getCurrentContext();
@@ -500,18 +500,18 @@ pout << "Run to here 16" << std::endl;
         HierarchySideDataOpsReal<NDIM, double> hier_sc_data_ops(patch_hierarchy, coarsest_ln, finest_ln);
         hier_sc_data_ops.subtract(u_idx, u_idx, u_cloned_idx);
         pout << std::setprecision(16) << "Error in u at time " << loop_time << ":\n"
-             << "  L1-norm:  " << hier_sc_data_ops.L1Norm(u_idx, wgt_sc_idx) << "\n"
-             << "  L2-norm:  " << hier_sc_data_ops.L2Norm(u_idx, wgt_sc_idx) << "\n"
-             << "  max-norm: " << hier_sc_data_ops.maxNorm(u_idx, wgt_sc_idx) << "\n"
-             << "+++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+            << "  L1-norm:  " << hier_sc_data_ops.L1Norm(u_idx, wgt_sc_idx) << "\n"
+            << "  L2-norm:  " << hier_sc_data_ops.L2Norm(u_idx, wgt_sc_idx) << "\n"
+            << "  max-norm: " << hier_sc_data_ops.maxNorm(u_idx, wgt_sc_idx) << "\n"
+            << "+++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
         HierarchyCellDataOpsReal<NDIM, double> hier_cc_data_ops(patch_hierarchy, coarsest_ln, finest_ln);
         hier_cc_data_ops.subtract(p_idx, p_idx, p_cloned_idx);
         pout << "Error in p at time " << loop_time - 0.5 * dt << ":\n"
-             << "  L1-norm:  " << hier_cc_data_ops.L1Norm(p_idx, wgt_cc_idx) << "\n"
-             << "  L2-norm:  " << hier_cc_data_ops.L2Norm(p_idx, wgt_cc_idx) << "\n"
-             << "  max-norm: " << hier_cc_data_ops.maxNorm(p_idx, wgt_cc_idx) << "\n"
-             << "+++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+            << "  L1-norm:  " << hier_cc_data_ops.L1Norm(p_idx, wgt_cc_idx) << "\n"
+            << "  L2-norm:  " << hier_cc_data_ops.L2Norm(p_idx, wgt_cc_idx) << "\n"
+            << "  max-norm: " << hier_cc_data_ops.maxNorm(p_idx, wgt_cc_idx) << "\n"
+            << "+++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
         if (dump_viz_data && uses_visit)
         {
@@ -536,9 +536,9 @@ pout << "Run to here 16" << std::endl;
 
 void
 compute_velocity_profile(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
-                         const int u_idx,
-                         const double /*data_time*/,
-                         const string& /*data_dump_dirname*/)
+    const int u_idx,
+    const double /*data_time*/,
+    const string& /*data_dump_dirname*/)
 {
     const int coarsest_ln = 0;
     const int finest_ln = patch_hierarchy->getFinestLevelNumber();
@@ -570,9 +570,9 @@ compute_velocity_profile(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
 
             // Entire box containing the required data.
             Box<NDIM> box(IndexUtilities::getCellIndex(
-                              &X_min[0], patch_x_lower, patch_x_upper, patch_dx, patch_lower, patch_upper),
-                          IndexUtilities::getCellIndex(
-                              &X_max[0], patch_x_lower, patch_x_upper, patch_dx, patch_lower, patch_upper));
+                &X_min[0], patch_x_lower, patch_x_upper, patch_dx, patch_lower, patch_upper),
+                IndexUtilities::getCellIndex(
+                    &X_max[0], patch_x_lower, patch_x_upper, patch_dx, patch_lower, patch_upper));
             // Part of the box on this patch
             Box<NDIM> trim_box = patch_box * box;
             BoxList<NDIM> iterate_box_list = trim_box;
@@ -659,10 +659,10 @@ compute_velocity_profile(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
 
 void
 output_data(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
-            tbox::Pointer<INSHierarchyIntegrator> navier_stokes_integrator,
-            const int iteration_num,
-            const double loop_time,
-            const string& data_dump_dirname)
+    tbox::Pointer<INSHierarchyIntegrator> navier_stokes_integrator,
+    const int iteration_num,
+    const double loop_time,
+    const string& data_dump_dirname)
 {
     plog << "writing hierarchy data at iteration " << iteration_num << " to disk" << endl;
     plog << "simulation time is " << loop_time << endl;
@@ -675,9 +675,9 @@ output_data(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
     VariableDatabase<NDIM>* var_db = VariableDatabase<NDIM>::getDatabase();
     ComponentSelector hier_data;
     hier_data.setFlag(var_db->mapVariableAndContextToIndex(navier_stokes_integrator->getVelocityVariable(),
-                                                           navier_stokes_integrator->getCurrentContext()));
+        navier_stokes_integrator->getCurrentContext()));
     hier_data.setFlag(var_db->mapVariableAndContextToIndex(navier_stokes_integrator->getPressureVariable(),
-                                                           navier_stokes_integrator->getCurrentContext()));
+        navier_stokes_integrator->getCurrentContext()));
     patch_hierarchy->putToDatabase(hier_db->putDatabase("PatchHierarchy"), hier_data);
     hier_db->putDouble("loop_time", loop_time);
     hier_db->putInteger("iteration_num", iteration_num);
@@ -687,12 +687,12 @@ output_data(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
 
 void
 postprocess_data(tbox::Pointer<PatchHierarchy<NDIM> > /*patch_hierarchy*/,
-                 tbox::Pointer<INSHierarchyIntegrator> /*navier_stokes_integrator*/,
-                 Mesh& mesh,
-                 EquationSystems* equation_systems,
-                 const int /*iteration_num*/,
-                 const double loop_time,
-                 const string& /*data_dump_dirname*/)
+    tbox::Pointer<INSHierarchyIntegrator> /*navier_stokes_integrator*/,
+    Mesh& mesh,
+    EquationSystems* equation_systems,
+    const int /*iteration_num*/,
+    const double loop_time,
+    const string& /*data_dump_dirname*/)
 {
     const unsigned int dim = mesh.mesh_dimension();
     double F_integral[NDIM];
@@ -850,7 +850,7 @@ postprocess_data(tbox::Pointer<PatchHierarchy<NDIM> > /*patch_hierarchy*/,
                 }
                 n = (dx_dxi[0].cross(dx_dxi[1])).unit();
 
-                double p_ex_qp = -2. * p_e * x_qp(0) / (L) + p_e;
+                double p_ex_qp = -2. * p_e * x_qp(0) / (L)+p_e;
 
                 double ex_wss[NDIM];
                 double ex_U[NDIM];
@@ -911,9 +911,9 @@ postprocess_data(tbox::Pointer<PatchHierarchy<NDIM> > /*patch_hierarchy*/,
 
 void
 compute_pressure_profile(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
-                         const int p_idx,
-                         const double /*data_time*/,
-                         const string& /*data_dump_dirname*/)
+    const int p_idx,
+    const double /*data_time*/,
+    const string& /*data_dump_dirname*/)
 {
     const int coarsest_ln = 0;
     const int finest_ln = patch_hierarchy->getFinestLevelNumber();
@@ -946,9 +946,9 @@ compute_pressure_profile(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
 
             // Entire box containing the required data.
             Box<NDIM> box(IndexUtilities::getCellIndex(
-                              &X_min[0], patch_x_lower, patch_x_upper, patch_dx, patch_lower, patch_upper),
-                          IndexUtilities::getCellIndex(
-                              &X_max[0], patch_x_lower, patch_x_upper, patch_dx, patch_lower, patch_upper));
+                &X_min[0], patch_x_lower, patch_x_upper, patch_dx, patch_lower, patch_upper),
+                IndexUtilities::getCellIndex(
+                    &X_max[0], patch_x_lower, patch_x_upper, patch_dx, patch_lower, patch_upper));
             // Part of the box on this patch
             Box<NDIM> trim_box = patch_box * box;
             BoxList<NDIM> iterate_box_list = trim_box;
@@ -1024,9 +1024,9 @@ compute_pressure_profile(tbox::Pointer<PatchHierarchy<NDIM> > patch_hierarchy,
 
 void
 compute_flow_rate(const tbox::Pointer<PatchHierarchy<NDIM> > hierarchy,
-                  const int U_idx,
-                  const double loop_time,
-                  const int wgt_sc_idx)
+    const int U_idx,
+    const double loop_time,
+    const int wgt_sc_idx)
 {
     vector<double> qsrc;
     qsrc.resize(2);
@@ -1096,7 +1096,7 @@ compute_flow_rate(const tbox::Pointer<PatchHierarchy<NDIM> > hierarchy,
                                 if ((*wgt_sc_data)(i_s) > std::numeric_limits<double>::epsilon())
                                 {
                                     double dA = n[axis] * dV / dx[axis];
-                                    qsrc[side] += (*U_data)(i_s)*dA;
+                                    qsrc[side] += (*U_data)(i_s) * dA;
                                 }
                             }
                         }
